@@ -35,10 +35,25 @@ _ = async () =>
 
     await foreach (var fileChange in streamingCall.ResponseStream.ReadAllAsync(cts.Token))
     {
-        if (!File.Exists(fileChange.OldPath))
+        if (!File.Exists(fileChange.OldPath) && fileChange.NewPath is not null) // CREATED
         {
-            
+            File.WriteAllBytes(fileChange.NewPath, fileChange.Contents.ToByteArray());
+            continue;
         }
+
+        if (File.Exists(fileChange.OldPath) && !File.Exists(fileChange.NewPath)) // DELETED
+        {
+            File.Delete(fileChange.OldPath);
+            continue;
+        }
+
+        if (File.Exists(fileChange.OldPath) && fileChange.OldPath != fileChange.NewPath) // MOVED
+        {
+            File.Move(fileChange.OldPath, fileChange.NewPath ?? fileChange.OldPath);
+            continue;
+        }
+
+        await File.WriteAllBytesAsync(fileChange.NewPath!, fileChange.Contents.ToByteArray());
     }
     AnsiConsole.MarkupLine("[orange]Listener for server changes stopped[/]");
 };
