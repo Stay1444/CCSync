@@ -60,7 +60,7 @@ public sealed class WorldProvider : IHostedService, IDisposable
                         "example-world", new World()
                         {
                             Name = "Example World",
-                            Path = "/worlds/example-world"
+                            Path = "/worlds/example-world/computercraft/computer"
                         }
                     }
                 };
@@ -69,6 +69,9 @@ public sealed class WorldProvider : IHostedService, IDisposable
             }, cancellationToken);
             foreach (var (id, world) in worlds)
             {
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (string.IsNullOrEmpty(id) || world == null) continue;
+                world.Id = id;
                 var remove = false;
 
                 if (string.IsNullOrEmpty(world.Name) || string.IsNullOrWhiteSpace(world.Name))
