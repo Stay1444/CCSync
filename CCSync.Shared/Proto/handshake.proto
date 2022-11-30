@@ -1,0 +1,32 @@
+﻿syntax = "proto3";
+
+package CCSync.RPC;
+
+service Handshake {
+  rpc GetWorlds(GetWorldsRequest) returns (GetWorldsResponse);
+  rpc WaitForAuth(WaitForAuthRequest) returns (WaitForAuthResponse);
+}
+
+message World {
+  string Id = 1;
+  string Name = 2;
+}
+
+message GetWorldsRequest {
+  
+}
+
+message GetWorldsResponse {
+  repeated World Worlds = 1;
+}
+
+message WaitForAuthRequest {
+  string Auth = 1;
+  string WorldId = 2;
+}
+
+message WaitForAuthResponse {
+  bool success = 1;
+  string error = 2;
+}
+
