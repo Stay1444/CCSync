@@ -1,3 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using CCSync.Client;
 
-Console.WriteLine("Hello, World!");
+if (args.Length > 0)
+{
+    Directory.SetCurrentDirectory(args[0]);
+}
+
+var project = await ProjectLoader.LoadProjectAsync() ?? await ProjectSetup.Setup();
+
