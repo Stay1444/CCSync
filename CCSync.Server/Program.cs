@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using AutoMapper;
+using CCSync.Server.Controllers;
 using CCSync.Server.Services;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
@@ -52,19 +52,15 @@ builder.WebHost.UseKestrel(c =>
         options.Protocols = HttpProtocols.Http2;
     });
 });
-
-var autoMapperConfig = new MapperConfiguration(cfg =>
-{
-
-});
-
-builder.Services.AddSingleton(autoMapperConfig.CreateMapper());
-
-builder.Services.AddHostedService<WorldProvider>();
-
 builder.Services.AddGrpc();
 
+builder.Services.AddSingleton<WorldProvider>();
+builder.Services.AddTransient<AuthWaiterService>();
+builder.Services.AddHostedService<WorldProvider>(x => x.GetService<WorldProvider>()!);
+
 var app = builder.Build();
+
+app.MapGrpcService<HandshakeController>();
 
 Log.Information("Ready on {0}:{1}", host, port);
 
