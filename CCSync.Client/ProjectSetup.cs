@@ -29,7 +29,7 @@ sealed class ProjectSetup
                     await channel.ConnectAsync(cts.Token);
                     
                     ctx.Status("Requesting worlds...");
-                    var handshakeClient = new Handshake.HandshakeClient(channel);
+                    var handshakeClient = new HandshakeService.HandshakeServiceClient(channel);
                     var worldsResponse = await handshakeClient.GetWorldsAsync(new GetWorldsRequest());
                     worlds = worldsResponse.Worlds.ToArray();
                 }
@@ -90,7 +90,7 @@ sealed class ProjectSetup
                     await channel.ConnectAsync();
                     
                     ctx.Status("Waiting...");
-                    var handshakeClient = new Handshake.HandshakeClient(channel);
+                    var handshakeClient = new HandshakeService.HandshakeServiceClient(channel);
                     var result = await handshakeClient.WaitForAuthAsync(new WaitForAuthRequest()
                     {
                         Auth = auth.ToString(),

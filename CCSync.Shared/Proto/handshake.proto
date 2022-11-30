@@ -2,7 +2,7 @@
 
 package CCSync.RPC;
 
-service Handshake {
+service HandshakeService {
   rpc GetWorlds(GetWorldsRequest) returns (GetWorldsResponse);
   rpc WaitForAuth(WaitForAuthRequest) returns (WaitForAuthResponse);
 }

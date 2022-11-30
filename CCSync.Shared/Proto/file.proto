@@ -1,8 +1,21 @@
 ﻿syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 package CCSync.RPC;
 
-service File {
-  
+service FileService {
+  rpc OnClientFileChanged(stream FileChanged) returns (google.protobuf.Empty);
+  rpc OnServerFileChanged(google.protobuf.Empty) returns (stream FileChanged);
 }
+
+// With this variables we can determine if the file was modified, created, moved or deleted
+// If OldPath is null and NewPath is not: the file was created
+// If OldPath is not null and NewPath is null: the file was deleted
+// If both paths are not null but they are not equal, the file was moved
+// If boths paths are equal the file contents were modified
+message FileChanged {
+  string OldPath = 1; 
+  string NewPath = 2; 
+  bytes Contents = 3;
+}                     
 

@@ -5,7 +5,7 @@ using Serilog;
 
 namespace CCSync.Server.Controllers;
 
-public sealed class HandshakeController : Handshake.HandshakeBase
+public sealed class HandshakeController : HandshakeService.HandshakeServiceBase
 {
     private readonly WorldProvider _worldService;
     private readonly AuthWaiterService _authWaiterService;
