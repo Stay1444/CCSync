@@ -5,6 +5,7 @@ namespace CCSync.Server.Services;
 
 public sealed class AuthWaiterService : IDisposable
 {
+    public const string AUTH_FILE_NAME = "ccsync";
     private readonly TaskCompletionSource _taskCompletionSource = new TaskCompletionSource();
     private FileSystemWatcher? _fileSystemWatcher;
     private CancellationToken _token = CancellationToken.None;
@@ -63,7 +64,7 @@ public sealed class AuthWaiterService : IDisposable
     {
         Console.WriteLine(e.FullPath);
         if (_taskCompletionSource.Task.IsCompleted) return;
-        if (Path.GetFileName(e.FullPath) != "ccsync") return;
+        if (Path.GetFileName(e.FullPath) != AUTH_FILE_NAME) return;
         _ = CheckChangesAsync(new FileInfo(e.FullPath));
     }
 
