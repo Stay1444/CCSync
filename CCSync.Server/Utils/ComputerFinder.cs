@@ -13,7 +13,7 @@ public static class ComputerFinder
             {
                 if ((await File.ReadAllTextAsync(path)).Replace("\n","") == authId)
                 {
-                    return path;
+                    return directory;
                 }
             }
         }

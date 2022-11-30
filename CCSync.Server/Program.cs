@@ -54,10 +54,10 @@ builder.WebHost.UseKestrel(c =>
 });
 builder.Services.AddGrpc();
 
+builder.Services.AddSingleton<ProtectedFilesService>();
 builder.Services.AddSingleton<WorldProvider>();
 builder.Services.AddTransient<AuthWaiterService>();
 builder.Services.AddTransient<FileListenerService>();
-
 builder.Services.AddHostedService<WorldProvider>(x => x.GetService<WorldProvider>()!);
 
 var app = builder.Build();

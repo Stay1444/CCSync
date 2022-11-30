@@ -1,4 +1,4 @@
-﻿namespace CCSync.Server.Utils;
+﻿namespace CCSync.Shared.Utils;
 
 public static class IOUtils
 {
@@ -27,5 +27,14 @@ public static class IOUtils
 
         //file is not locked
         return false;
+    }
+    
+    public static bool IsSubPathOf(this string subPath, string basePath) {
+        var rel = Path.GetRelativePath(basePath, subPath);
+        return rel != "."
+               && rel != ".."
+               && !rel.StartsWith("../")
+               && !rel.StartsWith(@"..\")
+               && !Path.IsPathRooted(rel);
     }
 }

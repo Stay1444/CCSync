@@ -1,4 +1,4 @@
-﻿namespace CCSync.Server.Services;
+﻿namespace CCSync.Client;
 
 public sealed class FileListenerService : IDisposable
 {
@@ -17,9 +17,6 @@ public sealed class FileListenerService : IDisposable
         this._fileSystemWatcher = new FileSystemWatcher(directory, "*.*");
         _fileSystemWatcher.IncludeSubdirectories = true;
         _fileSystemWatcher.EnableRaisingEvents = true;
-        //_fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName |
-        //                                  NotifyFilters.DirectoryName | NotifyFilters.CreationTime |
-        //                                  NotifyFilters.Size | NotifyFilters.LastAccess;
         
         _fileSystemWatcher.Deleted += FileSystemWatcherOnDeleted;
         _fileSystemWatcher.Renamed += FileSystemWatcherOnRenamed;
@@ -53,7 +50,7 @@ public sealed class FileListenerService : IDisposable
             }
 
             if (previousHandle is not null) await previousHandle;
-
+            
             return await _taskCompletionSource!.Task;
         }
         finally
