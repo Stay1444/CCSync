@@ -12,9 +12,12 @@ public sealed class WorldProvider : IHostedService, IDisposable
     public ImmutableDictionary<string, World> Worlds { get; private set; } = ImmutableDictionary<string, World>.Empty;
 
     private FileSystemWatcher? _fileSystemWatcher;
-    
-    public World? GetWorld(string id)
-        => Worlds.GetValueOrDefault(id);
+
+    public World? GetWorld(string? id)
+    {
+        if (id is null) return null;
+        return Worlds.GetValueOrDefault(id);
+    }
     
     public async Task StartAsync(CancellationToken cancellationToken)
     {
