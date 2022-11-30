@@ -56,11 +56,14 @@ builder.Services.AddGrpc();
 
 builder.Services.AddSingleton<WorldProvider>();
 builder.Services.AddTransient<AuthWaiterService>();
+builder.Services.AddTransient<FileListenerService>();
+
 builder.Services.AddHostedService<WorldProvider>(x => x.GetService<WorldProvider>()!);
 
 var app = builder.Build();
 
 app.MapGrpcService<HandshakeController>();
+app.MapGrpcService<FileController>();
 
 Log.Information("Ready on {0}:{1}", host, port);
 
