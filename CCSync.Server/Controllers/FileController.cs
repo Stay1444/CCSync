@@ -2,6 +2,7 @@
 using CCSync.Server.Services;
 using CCSync.Server.Utils;
 using CCSync.Shared.Utils;
+using CCSync.Shared.Utils.Services;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -60,11 +61,15 @@ public sealed class FileController : FileService.FileServiceBase
             {
                 if (_protectedFilesService.IsLocked(GetPath(fileChange.OldPath)))
                 {
+                    Log.Debug("Client modify request targets a locked file, skipping");
+                    _protectedFilesService.UnlockPath(GetPath(fileChange.OldPath)!);
                     continue;    
                 }
 
                 if (_protectedFilesService.IsLocked(GetPath(fileChange.NewPath)))
                 {
+                    Log.Debug("Client modify request targets a locked file, skipping");
+                    _protectedFilesService.UnlockPath(GetPath(fileChange.NewPath)!);
                     continue;
                 }
 
@@ -75,6 +80,15 @@ public sealed class FileController : FileService.FileServiceBase
                 {
                     _protectedFilesService.LockFile(newPathAbs);
                     
+
+                    if (fileChange.IsDirectory == 1)
+                    {
+                        Log.Debug("Client creating a remote file {0}", fileChange.NewPath);
+                        Directory.CreateDirectory(newPathAbs);
+                        continue;
+                    }
+                    Log.Debug("Client creating a remote file {0}", fileChange.NewPath);
+                    
                     await File.WriteAllBytesAsync(newPathAbs, fileChange.Contents.ToByteArray(),
                         context.CancellationToken);
                     continue;
@@ -83,21 +97,48 @@ public sealed class FileController : FileService.FileServiceBase
                 if (File.Exists(oldPathAbs) && !File.Exists(newPathAbs)) // DELETED
                 {
                     _protectedFilesService.LockFile(oldPathAbs);
+
+                    if (Directory.Exists(oldPathAbs))
+                    {
+                        Log.Debug("Client deleted a remote directory {0}", fileChange.OldPath);
+
+                        Directory.Delete(oldPathAbs, true);
+                        continue;
+                    }
+                    Log.Debug("Client deleted a remote file {0}", fileChange.OldPath);
+
                     File.Delete(oldPathAbs);
                     continue;
                 }
 
                 if (File.Exists(oldPathAbs) && fileChange.OldPath != fileChange.NewPath) // MOVED
                 {
+                    Log.Debug("Client moved a remote file from {0} to {1}", fileChange.OldPath, fileChange.NewPath);
                     if (newPathAbs is null) continue;
                     _protectedFilesService.LockFile(newPathAbs);
+
                     File.Move(oldPathAbs, newPathAbs);
                     continue;
                 }
+
+                if (Directory.Exists(oldPathAbs) && fileChange.OldPath != fileChange.NewPath)
+                {
+                    Log.Debug("Client moved a remote directory from {0} to {1}", fileChange.OldPath, fileChange.NewPath);
+                    if (newPathAbs is null) continue;
+                    _protectedFilesService.LockFile(newPathAbs);
+
+                    Directory.Move(oldPathAbs, newPathAbs);
+                }
                 
-                if (newPathAbs is null) continue;
+                if (string.IsNullOrEmpty(newPathAbs)) continue;
                 
                 _protectedFilesService.LockFile(newPathAbs);
+
+                if (Directory.Exists(newPathAbs))
+                {
+                    Directory.CreateDirectory(newPathAbs);
+                    continue;
+                }
                 
                 await File.WriteAllBytesAsync(newPathAbs, fileChange.Contents.ToByteArray(),
                     context.CancellationToken);
@@ -144,9 +185,11 @@ public sealed class FileController : FileService.FileServiceBase
             {
                 try
                 {
-                    var (oldPath, newPath, sendContent) = await _fileListenerService.ListenAsync();
-                    var msg = new FileChanged();
-
+                    var (oldPath, newPath, isDirectory, sendContent) = await _fileListenerService.ListenAsync();
+                    var msg = new FileChanged
+                    {
+                        IsDirectory = isDirectory
+                    };
                     if (oldPath is not null)
                     {
                         msg.OldPath = parentUri.MakeRelativeUri(new Uri(oldPath)).ToString();
@@ -159,12 +202,14 @@ public sealed class FileController : FileService.FileServiceBase
 
                     if (_protectedFilesService.IsLocked(msg.OldPath))
                     {
+                        Log.Debug("Detected local change but file was locked, skipping");
                         _protectedFilesService.UnlockPath(msg.OldPath);
                         continue;
                     }
 
                     if (_protectedFilesService.IsLocked(msg.NewPath))
                     {
+                        Log.Debug("Detected local change but file was locked, skipping");
                         _protectedFilesService.UnlockPath(msg.NewPath);
                         continue;
                     }

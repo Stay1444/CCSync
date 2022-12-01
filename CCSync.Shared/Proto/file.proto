@@ -15,7 +15,8 @@ service FileService {
 // If boths paths are equal the file contents were modified
 message FileChanged {
   string OldPath = 1; 
-  string NewPath = 2; 
-  bytes Contents = 3;
+  string NewPath = 2;
+  int32 IsDirectory = 3; // 0 = FALSE, 1 = TRUE, 2 = UNKNOWN
+  bytes Contents = 4;
 }                     
 

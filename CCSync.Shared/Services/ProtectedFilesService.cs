@@ -1,4 +1,4 @@
-﻿namespace CCSync.Server.Services;
+﻿namespace CCSync.Shared.Utils.Services;
 
 public sealed class ProtectedFilesService
 {
@@ -14,7 +14,7 @@ public sealed class ProtectedFilesService
 
     public bool IsLocked(string? path)
     {
-        if (path is null) return false;
+        if (string.IsNullOrEmpty(path)) return false;
         lock (_lockedFiles)
         {
             return _lockedFiles.Contains(path);

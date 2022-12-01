@@ -1,5 +1,6 @@
 ﻿using CCSync.Client;
 using CCSync.RPC;
+using CCSync.Shared.Utils.Services;
 using Grpc.Net.Client;
 using Spectre.Console;
 
@@ -24,9 +25,8 @@ Console.CancelKeyPress += (_, _) =>
     cts.Cancel();
 };
 
-var protectedFiles = new List<string>();
-
-_ = new RemoteListener().ListenAsync(project, fileClient, protectedFiles, cts);
-_ = new LocalListener().ListenAsync(project, fileClient, protectedFiles, cts);
+var protectedFiles = new ProtectedFilesService();
+_ = new RemoteListener(protectedFiles).ListenAsync(project, fileClient, cts);
+_ = new LocalListener(protectedFiles).ListenAsync(project, fileClient, cts);
 
 await Task.Delay(-1, cts.Token);
