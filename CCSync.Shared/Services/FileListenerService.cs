@@ -109,13 +109,12 @@ public sealed class FileListenerService : IDisposable
         }
     }
 
-    private bool IsDirectory(string path)
+    private static bool IsDirectory(string path)
     {
         try
         {
-            _ = new DirectoryInfo(path);
-            Console.WriteLine($"{path} is a directory");
-            return true;
+            var info = File.GetAttributes(path);
+            return info.HasFlag(FileAttributes.Directory);
         }
         catch
         {

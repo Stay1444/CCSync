@@ -6,6 +6,7 @@ public sealed class ProtectedFilesService
     
     public void LockFile(string path)
     {
+        if (string.IsNullOrEmpty(path)) return;
         lock (_lockedFiles)
         {
             _lockedFiles.Add(path);

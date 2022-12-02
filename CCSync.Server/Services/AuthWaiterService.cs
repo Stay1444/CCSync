@@ -1,5 +1,4 @@
 ﻿using CCSync.Server.Entities;
-using CCSync.Server.Utils;
 using CCSync.Shared.Utils;
 
 namespace CCSync.Server.Services;
@@ -44,10 +43,7 @@ public sealed class AuthWaiterService : IDisposable
         try
         {
             await _checkSemaphore.WaitAsync(_token);
-            while (IOUtils.IsFileLocked(fileInfo) && !_token.IsCancellationRequested)
-            {
-                await Task.Delay(50, _token);
-            }
+            await IOUtils.WaitForUnlock(fileInfo.FullName, _token);
 
             var contents = await File.ReadAllTextAsync(fileInfo.FullName, _token);
             if (contents.Replace("\n", "") == _authKey.ToString())

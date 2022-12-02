@@ -2,7 +2,28 @@
 
 public static class IOUtils
 {
-    public static bool IsFileLocked(FileInfo file)
+    public static async Task WaitForUnlock(string path, CancellationToken token)
+    {
+        var fileInfo = new FileInfo(path);
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var fs = fileInfo.OpenRead();
+                fs.Close();
+                await fs.DisposeAsync();
+                break;
+            }
+            catch
+            {
+                if (!File.Exists(path)) break;
+                Console.WriteLine("File is locked, waiting 50ms");
+                await Task.Delay(50, token);
+            }
+        }
+    }
+    
+    private static bool IsFileLocked(FileInfo file)
     {
         if (!file.Exists) return false;
         

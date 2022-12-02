@@ -50,11 +50,7 @@ public sealed class WorldProvider : IHostedService, IDisposable
     {
         try
         {
-            var fileInfo = new FileInfo(FILE_NAME);
-            while (IOUtils.IsFileLocked(fileInfo))
-            {
-                await Task.Delay(50, cancellationToken);
-            }
+            await IOUtils.WaitForUnlock(FILE_NAME, cancellationToken);
 
             var worlds = await CCSyncYaml.ReadYamlAsync(FILE_NAME, () =>
             {

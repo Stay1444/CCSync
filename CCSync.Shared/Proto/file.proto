@@ -14,9 +14,10 @@ service FileService {
 // If both paths are not null but they are not equal, the file was moved
 // If boths paths are equal the file contents were modified
 message FileChanged {
-  string OldPath = 1; 
-  string NewPath = 2;
-  int32 IsDirectory = 3; // 0 = FALSE, 1 = TRUE, 2 = UNKNOWN
-  bytes Contents = 4;
+  int32 ChangeId = 1;
+  string OldPath = 2;
+  string NewPath = 3;
+  int32 IsDirectory = 4; // 0 = FALSE, 1 = TRUE, 2 = UNKNOWN
+  bytes Contents = 5;
 }                     
 
